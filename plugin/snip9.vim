@@ -12,6 +12,7 @@ endif
 # import the engine
 import autoload '../autoload/snip9/engine.vim'
 import autoload '../autoload/snip9/parser.vim'
+import autoload '../autoload/snip9/jump.vim'
 
 # XXX only for debugging:
 var compiled_snippets = {
@@ -70,8 +71,30 @@ var compiled_snippets = {
     }
 }
 
-def ExpandWrap(ast: list<dict<any>>)
-    engine.SnippetExpand(ast)
+def SmartBind()
+    var col = col('.')
+    var line = getline('.')
+    var prefix = col == 1 ? "" : line[ : col - 2]
+    var curword = matchstr(prefix, '\S\+$')
+
+    # TODO add filetype here
+    if has_key(compiled_snippets['c'], curword)
+        var start = col - len(curword) - 1
+        var nl = (start > 0 ? line[ : start - 1] : "") .. line[col - 1 : ]
+        setline('.', nl)
+        cursor(line('.'), start + 1)
+
+        engine.SnippetExpand(compiled_snippets['c'][curword])
+    endif
+
+    if !empty(prop_find({type: 'snippet_mark', lnum: 1, col: 1}, 'f'))
+        jump.JumpForward()
+        return
+    endif
 enddef
 
-command! -nargs=1 ExpandSnip ExpandWrap(compiled_snippets['c'][<args>])
+# TODO make these user definable
+inoremap <C-j> <ScriptCmd>SmartBind()<CR>
+snoremap <C-j> <ScriptCmd>SmartBind()<CR>
+vnoremap <C-j> <ScriptCmd>engine.CaptureVisual()<CR>
+
