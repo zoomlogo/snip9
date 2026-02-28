@@ -106,3 +106,5 @@ inoremap <C-j> <ScriptCmd>SmartBind()<CR>
 snoremap <C-j> <ScriptCmd>SmartBind()<CR>
 xnoremap <C-j> <ScriptCmd>engine.CaptureVisual()<CR>
 
+inoremap <C-k> <ScriptCmd>engine.JumpBackward()<CR>
+snoremap <C-k> <ScriptCmd>engine.JumpBackward()<CR>

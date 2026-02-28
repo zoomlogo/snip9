@@ -8,6 +8,7 @@ var active_visual_text = ""
 
 const ID_JUMPS = 100
 var base_id = 0
+# TODO refactor snippet (dict<any>) into a class
 var snippet_stack: list<dict<any>> = []
 
 # Evaluate and return a string.
@@ -103,8 +104,6 @@ export def SnippetExpand(ast: list<dict<any>>)
     endfor
 
     active_visual_text = ""
-    # TODO
-    # JumpForward()
 enddef
 
 # Capture visually selected text.
@@ -129,6 +128,16 @@ def Cleanup(snip: dict<any>)
             both: true
         })
     endfor
+enddef
+
+def SelectProp(prop: dict<any>)
+    var keys = "\<Esc>" .. prop.lnum .. "G" .. prop.col .. "|"
+    if prop.length > 0
+        keys ..= "v" .. (prop.length - 1) .. "l\<C-g>"
+    else
+        keys ..= "a"
+    endif
+    feedkeys(keys, 'n')
 enddef
 
 export def JumpForward()
@@ -156,15 +165,33 @@ export def JumpForward()
         return
     endif
 
-    var keys = "\<Esc>" .. prop.lnum .. "G" .. prop.col .. "|"
-    if prop.length > 0
-        keys ..= "v" .. (prop.length - 1) .. "l\<C-g>"
-    else
-        keys ..= "a"
-    endif
-    feedkeys(keys, 'n')
+    SelectProp(prop)
 
     if snip.cur == 0
         Cleanup(snip)
     endif
+enddef
+
+export def JumpBackward()
+    if empty(snippet_stack) | return | endif
+
+    var snip = snippet_stack[-1]
+    snip.cur -= 1
+    snip.cur = snip.cur < 0 ? snip.max : snip.cur
+
+    var target_id = snip.base + snip.cur
+    var prop = prop_find({
+        type: 'snippet_mark',
+        id: target_id,
+        lnum: 1,
+        col: 1,
+        both: true
+    })
+
+    if empty(prop)
+        JumpBackward()
+        return
+    endif
+
+    SelectProp(prop)
 enddef
