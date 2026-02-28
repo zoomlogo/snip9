@@ -14,7 +14,7 @@ enddef
 
 # Expand a snippet from its AST.
 # Recursively calls itself to handle AST.Mark.
-def SnippetExpandR(ast: list<dict<any>>, loff: number = 0, coff: number = 0): list<string>
+def SnippetExpandR(ast: list<dict<any>>, indent: string, loff: number = 0, coff: number = 0): list<string>
     var lines = [""]
 
     for token in ast
@@ -34,7 +34,7 @@ def SnippetExpandR(ast: list<dict<any>>, loff: number = 0, coff: number = 0): li
             var m_col = (len(lines) == 1 ? coff : 0) + len(lines[-1]) + 1
 
             var child_ast = token->get('value', [])
-            var child_lines = SnippetExpandR(child_ast, m_lnum, m_col - 1)
+            var child_lines = SnippetExpandR(child_ast, indent, m_lnum, m_col - 1)
             val = child_lines->join("\n")
 
             markers->add({
@@ -53,6 +53,9 @@ def SnippetExpandR(ast: list<dict<any>>, loff: number = 0, coff: number = 0): li
         var parts = val->split('\n', 1)
         lines[-1] ..= parts[0]
         if len(parts) > 1
+            for i in range(1, len(parts) - 1)
+                parts[i] = indent .. parts[i]
+            endfor
             lines->extend(parts[1 : ])
         endif
     endfor
@@ -69,7 +72,8 @@ export def SnippetExpand(ast: list<dict<any>>)
     var prefix = col == 1 ? "" : curline[ : col - 2]
     var suffix = curline[col - 1 : ]
 
-    var lines = SnippetExpandR(ast, 0, len(prefix))
+    var indent = matchstr(prefix, '^\s*')
+    var lines = SnippetExpandR(ast, indent, 0, len(prefix))
     lines[0] = prefix .. lines[0]
     lines[-1] ..= suffix
 
