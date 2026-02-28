@@ -75,7 +75,16 @@ var compiled_snippets = {
             {type: parser.AST.Text, value: " "},
             {type: parser.AST.Mark, id: 3, value: [{type: parser.AST.Text, value: "mark3"}]},
             {type: parser.AST.Mark, id: 0},
-        ]
+        ],
+        'C': [
+            {type: parser.AST.Text, value: "testing "},
+            {type: parser.AST.Mark, id: 1, value: [{type: parser.AST.Text, value: "mark1"}]},
+            {type: parser.AST.Text, value: " "},
+            {type: parser.AST.Mark, id: 1, value: [{type: parser.AST.Text, value: "mark1"}]},
+            {type: parser.AST.Text, value: " "},
+            {type: parser.AST.Mark, id: 1, value: [{type: parser.AST.Text, value: "mark1"}]},
+            {type: parser.AST.Mark, id: 0},
+        ],
     }
 }
 

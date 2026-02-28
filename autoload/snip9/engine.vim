@@ -104,6 +104,11 @@ export def SnippetExpand(ast: list<dict<any>>)
     endfor
 
     active_visual_text = ""
+
+    augroup Snip9Mirrors
+        autocmd! * <buffer>
+        autocmd TextChangedI,TextChangedP <buffer> SyncMirrors()
+    augroup END
 enddef
 
 # Capture visually selected text.
@@ -128,6 +133,12 @@ def Cleanup(snip: dict<any>)
             both: true
         })
     endfor
+
+    if empty(snippet_stack)
+        augroup Snip9Mirrors
+            autocmd! * <buffer>
+        augroup END
+    endif
 enddef
 
 def SelectProp(prop: dict<any>)
@@ -194,4 +205,43 @@ export def JumpBackward()
     endif
 
     SelectProp(prop)
+enddef
+
+# Mirror handling.
+def SyncMirrors()
+    var active = prop_find({
+        type: 'snippet_mark',
+        lnum: line('.')
+    })
+    if empty(active) | return | endif
+
+    var curline = getline(active.lnum)
+    var text = curline[active.col - 1 : active.col + active.length - 2]
+
+    var mirrors = prop_list(1, {
+        end_lnum: line('$'),
+        types: ['snippet_mark'],
+        ids: [active.id]
+    })
+
+    var mirrors_linewise = {}
+    for mirror in mirrors
+        if !mirrors_linewise->has_key(mirror.lnum)
+            mirrors_linewise[mirror.lnum] = [mirror]
+        else
+            mirrors_linewise[mirror.lnum]->add(mirror)
+        endif
+    endfor
+
+    for mirror in mirrors
+        if mirror == active | continue | endif
+        var line = getline(mirror.lnum)
+        var nline = line[0 : mirror.col - 2] .. text .. line[mirror.col + mirror.length - 1 : -1]
+        noautocmd setline(mirror.lnum, nline)
+        prop_add(mirror.lnum, mirror.col, {
+            type: 'snippet_mark',
+            length: active.length,
+            id: active.id
+        })
+    endfor
 enddef
