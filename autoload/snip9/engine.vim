@@ -156,8 +156,13 @@ export def JumpForward()
         return
     endif
 
-    # TODO select text if present
-    cursor(prop.lnum, prop.col)
+    var keys = "\<Esc>" .. prop.lnum .. "G" .. prop.col .. "|"
+    if prop.length > 0
+        keys ..= "v" .. (prop.length - 1) .. "l\<C-g>"
+    else
+        keys ..= "a"
+    endif
+    feedkeys(keys, 'n')
 
     if snip.cur == 0
         Cleanup(snip)

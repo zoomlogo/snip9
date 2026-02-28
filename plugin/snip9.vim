@@ -82,13 +82,13 @@ var compiled_snippets = {
 def SmartBind()
     var col = col('.')
     var line = getline('.')
-    var prefix = col == 1 ? "" : line[ : col - 2]
+    var prefix = col == 1 ? '' : line[ : col - 2]
     var curword = matchstr(prefix, '\S\+$')
 
     # TODO add filetype here
     if has_key(compiled_snippets['c'], curword)
         var start = col - len(curword) - 1
-        var nl = (start > 0 ? line[ : start - 1] : "") .. line[col - 1 : ]
+        var nl = (start > 0 ? line[ : start - 1] : '') .. line[col - 1 : ]
         setline('.', nl)
         cursor(line('.'), start + 1)
 
