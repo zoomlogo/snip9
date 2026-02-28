@@ -6,6 +6,10 @@ import autoload './parser.vim'
 var markers = []
 var active_visual_text = ""
 
+const ID_JUMPS = 100
+var base_id = 0
+var snippet_stack: list<dict<any>> = []
+
 # Evaluate and return a string.
 def EvalString(expr: string): string
     # TODO Fix this later (can cause bugs if given lists or dicts).
@@ -13,7 +17,7 @@ def EvalString(expr: string): string
 enddef
 
 # Recursively expand a snippet from its AST.
-def SnippetExpandR(ast: list<dict<any>>, indent: string, loff: number = 0, coff: number = 0): list<string>
+def SnippetExpandR(ast: list<dict<any>>, indent: string, parent_id: number, loff: number = 0, coff: number = 0): list<string>
     var lines = [""]
 
     for token in ast
@@ -33,11 +37,11 @@ def SnippetExpandR(ast: list<dict<any>>, indent: string, loff: number = 0, coff:
             var m_col = (len(lines) == 1 ? coff : 0) + len(lines[-1]) + 1
 
             var child_ast = token->get('value', [])
-            var child_lines = SnippetExpandR(child_ast, indent, m_lnum, m_col - 1)
+            var child_lines = SnippetExpandR(child_ast, indent, parent_id, m_lnum, m_col - 1)
             val = child_lines->join("\n")
 
             markers->add({
-                id: token.id,
+                id: parent_id + token.id,
                 line_offset: m_lnum,
                 col: m_col,
                 len: len(val)
@@ -72,7 +76,16 @@ export def SnippetExpand(ast: list<dict<any>>)
     var suffix = curline[col - 1 : ]
 
     var indent = matchstr(prefix, '^\s*')
-    var lines = SnippetExpandR(ast, indent, 0, len(prefix))
+
+    var lines = SnippetExpandR(ast, indent, base_id, 0, len(prefix))
+    var max_id = len(markers) - 1
+    snippet_stack->add({
+        base: base_id,
+        max: max_id,
+        cur: 0
+    })
+    base_id += ID_JUMPS
+
     lines[0] = prefix .. lines[0]
     lines[-1] ..= suffix
 
@@ -102,4 +115,51 @@ export def CaptureVisual()
     @" = saved_register
     normal! gv"_d
     startinsert
+enddef
+
+# Jump
+def Cleanup(snip: dict<any>)
+    snippet_stack->remove(-1)
+    base_id -= ID_JUMPS
+    for i in range(snip.max + 1)
+        prop_remove({
+            all: true,
+            id: snip.base + i,
+            type: 'snippet_mark',
+            both: true
+        })
+    endfor
+enddef
+
+export def JumpForward()
+    if empty(snippet_stack) | return | endif
+
+    var snip = snippet_stack[-1]
+    snip.cur += 1
+    snip.cur = snip.cur > snip.max ? 0 : snip.cur
+
+    var target_id = snip.base + snip.cur
+    var prop = prop_find({
+        type: 'snippet_mark',
+        id: target_id,
+        lnum: 1,
+        col: 1,
+        both: true
+    })
+
+    if empty(prop)
+        if snip.cur == 0
+            Cleanup(snip)
+        endif
+
+        JumpForward()
+        return
+    endif
+
+    # TODO select text if present
+    cursor(prop.lnum, prop.col)
+
+    if snip.cur == 0
+        Cleanup(snip)
+    endif
 enddef

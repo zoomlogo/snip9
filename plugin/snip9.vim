@@ -12,7 +12,6 @@ endif
 # import the engine
 import autoload '../autoload/snip9/engine.vim'
 import autoload '../autoload/snip9/parser.vim'
-import autoload '../autoload/snip9/jump.vim'
 
 # XXX only for debugging:
 var compiled_snippets = {
@@ -38,7 +37,7 @@ var compiled_snippets = {
             {type: parser.AST.Mark, id: 1, value: [{type: parser.AST.Text, value: "cond"}]},
             {type: parser.AST.Text, value: ") {\n\t"},
             {type: parser.AST.Mark, id: 0, value: [{type: parser.AST.Visual}]},
-            {type: parser.AST.Text, value: "\n}\n"},
+            {type: parser.AST.Text, value: "\n}"},
         ],
         'guard': [
             {type: parser.AST.Text, value: "#ifndef "},
@@ -68,6 +67,15 @@ var compiled_snippets = {
             {type: parser.AST.Text, value: "\n"},
             {type: parser.AST.Mark, id: 0},
         ],
+        'B': [
+            {type: parser.AST.Text, value: "testing "},
+            {type: parser.AST.Mark, id: 1, value: [{type: parser.AST.Text, value: "mark1"}]},
+            {type: parser.AST.Text, value: " "},
+            {type: parser.AST.Mark, id: 2, value: [{type: parser.AST.Text, value: "mark2"}]},
+            {type: parser.AST.Text, value: " "},
+            {type: parser.AST.Mark, id: 3, value: [{type: parser.AST.Text, value: "mark3"}]},
+            {type: parser.AST.Mark, id: 0},
+        ]
     }
 }
 
@@ -87,8 +95,8 @@ def SmartBind()
         engine.SnippetExpand(compiled_snippets['c'][curword])
     endif
 
-    if !empty(prop_find({type: 'snippet_mark', lnum: 1, col: 1}, 'f'))
-        jump.JumpForward()
+    if !empty(prop_find({type: 'snippet_mark', lnum: 1, col: 1}))
+        engine.JumpForward()
         return
     endif
 enddef
@@ -96,5 +104,5 @@ enddef
 # TODO make these user definable
 inoremap <C-j> <ScriptCmd>SmartBind()<CR>
 snoremap <C-j> <ScriptCmd>SmartBind()<CR>
-vnoremap <C-j> <ScriptCmd>engine.CaptureVisual()<CR>
+xnoremap <C-j> <ScriptCmd>engine.CaptureVisual()<CR>
 
