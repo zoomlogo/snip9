@@ -12,8 +12,7 @@ def EvalString(expr: string): string
     return "" .. expr->eval()
 enddef
 
-# Expand a snippet from its AST.
-# Recursively calls itself to handle AST.Mark.
+# Recursively expand a snippet from its AST.
 def SnippetExpandR(ast: list<dict<any>>, indent: string, loff: number = 0, coff: number = 0): list<string>
     var lines = [""]
 
@@ -93,4 +92,14 @@ export def SnippetExpand(ast: list<dict<any>>)
     active_visual_text = ""
     # TODO
     # JumpForward()
+enddef
+
+# Capture visually selected text.
+export def CaptureVisual()
+    var saved_register = @"
+    normal! gv""y
+    active_visual_text = @"
+    @" = saved_register
+    normal! gv"_d
+    startinsert
 enddef
