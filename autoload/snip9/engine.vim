@@ -218,30 +218,50 @@ def SyncMirrors()
     var curline = getline(active.lnum)
     var text = curline[active.col - 1 : active.col + active.length - 2]
 
-    var mirrors = prop_list(1, {
+    var lnums = prop_list(1, {
         end_lnum: line('$'),
         types: ['snippet_mark'],
         ids: [active.id]
-    })
+    })->map((_, v) => v.lnum)
 
-    var mirrors_linewise = {}
-    for mirror in mirrors
-        if !mirrors_linewise->has_key(mirror.lnum)
-            mirrors_linewise[mirror.lnum] = [mirror]
-        else
-            mirrors_linewise[mirror.lnum]->add(mirror)
+    for lnum in lnums
+        var properties = prop_list(lnum, {types: ['snippet_mark']})
+            ->sort((a, b) => a.col - b.col)
+
+        var line = getline(lnum)
+        var offset = 0
+        var curshift = 0
+
+        for property in properties
+            property["lnum"] = lnum
+            property.col += offset
+
+            if property == active || property.id != active.id | continue | endif
+
+            var pre = property.col > 1 ? line[: property.col - 2] : ""
+            var post = line[property.col + property.length - 1 :]
+            line = pre .. text .. post
+
+            var diff = active.length - property.length
+            offset += diff
+            property.length = active.length
+
+            if lnum == active.lnum && property.col < col('.')
+                curshift += diff
+            endif
+        endfor
+        noautocmd setline(lnum, line)
+
+        for property in properties
+            prop_add(property.lnum, property.col, {
+                type: 'snippet_mark',
+                length: property.length,
+                id: property.id
+            })
+        endfor
+
+        if lnum == active.lnum && curshift != 0
+            cursor(lnum, col('.') + curshift)
         endif
-    endfor
-
-    for mirror in mirrors
-        if mirror == active | continue | endif
-        var line = getline(mirror.lnum)
-        var nline = line[0 : mirror.col - 2] .. text .. line[mirror.col + mirror.length - 1 : -1]
-        noautocmd setline(mirror.lnum, nline)
-        prop_add(mirror.lnum, mirror.col, {
-            type: 'snippet_mark',
-            length: active.length,
-            id: active.id
-        })
     endfor
 enddef

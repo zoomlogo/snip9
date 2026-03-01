@@ -6,9 +6,9 @@ Snip9 is a snippet engine made in Vim9 script.
 - [x] Insert-mode snippet expansion.
 - [x] Snippet jumping.
 - [x] Nested snippet jumping.
+- [x] Mirrored nodes.
 
 ## Work remaining:
-- [ ] Mirrored nodes.
 - [ ] Snippets file parser.
 - [ ] Snippets files for multiple languages.
 - [ ] User definable mappings.
