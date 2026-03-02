@@ -13,6 +13,9 @@ let g:snip9_smartexpand = '<C-j>'
 let g:snip9_jumpback = '<C-k>'
 ```
 
+It is recommended that you write your own snippets.  An example snippets file is
+given in the `sample_snippets/` folder in this repository.
+
 ## Completed:
 - [x] Snippet Expansion.
 - [x] Insert-mode snippet expansion.
