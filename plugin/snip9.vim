@@ -1,5 +1,9 @@
 vim9script
 
+# Options
+g:snip9_smartexpand = get(g:, 'snip9_smartexpand', '<C-j>')
+g:snip9_jumpback = get(g:, 'snip9_jumpback', '<C-k>')
+
 # Define text property.
 if empty(prop_type_get('snippet_mark'))
     prop_type_add('snippet_mark', {
@@ -40,16 +44,20 @@ def SmartBind()
     endif
 enddef
 
+def SetupMappings()
+    execute "inoremap <silent> " .. g:snip9_smartexpand .. " <ScriptCmd>SmartBind()<CR>"
+    execute "snoremap <silent> " .. g:snip9_smartexpand .. " <ScriptCmd>SmartBind()<CR>"
+    execute "xnoremap <silent> " .. g:snip9_smartexpand .. " <ScriptCmd>engine.CaptureVisual()<CR>"
+
+    execute "inoremap <silent> " .. g:snip9_jumpback .. " <ScriptCmd>engine.JumpBackward()<CR>"
+    execute "snoremap <silent> " .. g:snip9_jumpback .. " <ScriptCmd>engine.JumpBackward()<CR>"
+enddef
+
 # Autocommand for compiling snippets on demand.
 augroup Snip9Compile
     autocmd!
     autocmd FileType * parser.ParseSnippets(expand('<amatch>'))
 augroup END
 
-# TODO make these user definable
-inoremap <C-j> <ScriptCmd>SmartBind()<CR>
-snoremap <C-j> <ScriptCmd>SmartBind()<CR>
-xnoremap <C-j> <ScriptCmd>engine.CaptureVisual()<CR>
 
-inoremap <C-k> <ScriptCmd>engine.JumpBackward()<CR>
-snoremap <C-k> <ScriptCmd>engine.JumpBackward()<CR>
+SetupMappings()

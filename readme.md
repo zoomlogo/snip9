@@ -1,8 +1,17 @@
 # Snip9
-Snip9 is a snippet engine made in Vim9 script.
+Snip9 is a snippet engine made in Vim9 script.  It is compatible with snipMate
+syntax.
 
-## Known issues:
-- Empty markers enter insert mode in the wrong column.
+## Setup.
+Requires Vim 9+.
+
+Install using your favourite plugin manager.  The plugin searches for snippets
+under a `snippets/` folder in Vim's runtimepath with names `<ft>.snippets` where
+`<ft>` is the filetype detected by Vim.  To set the mappings use:
+```vim
+let g:snip9_smartexpand = '<C-j>'
+let g:snip9_jumpback = '<C-k>'
+```
 
 ## Completed:
 - [x] Snippet Expansion.
@@ -12,6 +21,13 @@ Snip9 is a snippet engine made in Vim9 script.
 - [x] Mirrored nodes.
 - [x] Snippets file parser.
 - [x] Snippets files for multiple languages.
+- [x] User definable mappings.
 
-## Work remaining:
-- [ ] User definable mappings.
+## TODO:
+- [ ] Write documentation for `:help`.
+
+## Known issues:
+- Empty markers enter insert mode in the wrong column.
+- Snipmate snippets which use snipmate specific functions cannot be used.
+
+Please open an issue if you find any bugs.

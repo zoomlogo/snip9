@@ -121,7 +121,7 @@ export def CaptureVisual()
     startinsert
 enddef
 
-# Jump
+# Cleans the snippet stack and text-properties.
 def Cleanup(snip: dict<any>)
     snippet_stack->remove(-1)
     base_id -= ID_JUMPS
@@ -141,6 +141,7 @@ def Cleanup(snip: dict<any>)
     endif
 enddef
 
+# Jumps to the property and selects it.
 def SelectProp(prop: dict<any>)
     var keys = "\<Esc>" .. prop.lnum .. "G" .. prop.col .. "|"
     if prop.length > 0
@@ -151,6 +152,7 @@ def SelectProp(prop: dict<any>)
     feedkeys(keys, 'n')
 enddef
 
+# Jump forwards.  Deletes the snippet marks when it reaches ID 0.
 export def JumpForward()
     if empty(snippet_stack) | return | endif
 
@@ -183,6 +185,7 @@ export def JumpForward()
     endif
 enddef
 
+# Jump backwards.  Does not delete the marks.
 export def JumpBackward()
     if empty(snippet_stack) | return | endif
 
@@ -208,6 +211,7 @@ export def JumpBackward()
 enddef
 
 # Mirror handling.
+# Update all marks with the same ID to match their texts.
 def SyncMirrors()
     var active = prop_find({
         type: 'snippet_mark',
