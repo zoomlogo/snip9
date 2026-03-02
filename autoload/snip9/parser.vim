@@ -154,6 +154,7 @@ export def ParseSnippets(fulltype: string)
     if empty(filetypes)
         filetypes = [fulltype]
     endif
+    filetypes->extend(['_'])
 
     for ft in filetypes
         if compiled_snippets->has_key(ft) | continue | endif

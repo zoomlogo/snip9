@@ -22,6 +22,7 @@ def SmartBind()
     if empty(filetypes)
         filetypes = [&filetype]
     endif
+    filetypes->extend(['_'])
 
     for filetype in filetypes
         if has_key(parser.compiled_snippets, filetype) && has_key(parser.compiled_snippets[filetype], curword)
