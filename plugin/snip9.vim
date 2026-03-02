@@ -3,7 +3,6 @@ vim9script
 # Define text property.
 if empty(prop_type_get('snippet_mark'))
     prop_type_add('snippet_mark', {
-        highlight: 'Search',  # debug
         start_incl: true,
         end_incl: true
     })
