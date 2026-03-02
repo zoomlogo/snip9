@@ -1,5 +1,8 @@
 vim9script
 
+# Plugin settings.
+g:snips_author = get(g:, 'snips_author', '')
+
 # Define text property.
 if empty(prop_type_get('snippet_mark'))
     prop_type_add('snippet_mark', {
