@@ -44,15 +44,6 @@ def SmartBind()
     endif
 enddef
 
-def SetupMappings()
-    execute "inoremap <silent> " .. g:snip9_smartexpand .. " <ScriptCmd>SmartBind()<CR>"
-    execute "snoremap <silent> " .. g:snip9_smartexpand .. " <ScriptCmd>SmartBind()<CR>"
-    execute "xnoremap <silent> " .. g:snip9_smartexpand .. " <ScriptCmd>engine.CaptureVisual()<CR>"
-
-    execute "inoremap <silent> " .. g:snip9_jumpback .. " <ScriptCmd>engine.JumpBackward()<CR>"
-    execute "snoremap <silent> " .. g:snip9_jumpback .. " <ScriptCmd>engine.JumpBackward()<CR>"
-enddef
-
 # Autocommand for compiling snippets on demand.
 augroup Snip9Compile
     autocmd!
