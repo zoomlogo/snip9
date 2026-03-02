@@ -1,6 +1,6 @@
 # Snip9
-Snip9 is a snippet engine made in Vim9 script.  It is compatible with snipMate
-syntax.
+Snip9 is a snippet engine made in Vim9 script.  It is _mostly_ compatible with
+snipMate's snippet syntax.
 
 ## Setup.
 Requires Vim 9+.
