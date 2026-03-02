@@ -1,9 +1,5 @@
 vim9script
 
-# Options
-g:snip9_smartexpand = get(g:, 'snip9_smartexpand', '<C-j>')
-g:snip9_jumpback = get(g:, 'snip9_jumpback', '<C-k>')
-
 # Define text property.
 if empty(prop_type_get('snippet_mark'))
     prop_type_add('snippet_mark', {
