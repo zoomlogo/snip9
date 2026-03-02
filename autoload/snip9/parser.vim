@@ -13,13 +13,21 @@ endenum
 
 # Strip comments and separate out individual snippets
 # TODO `extends <ft>`
-def ExtractRaw(body: list<string>): dict<string>
-    var raw_snippets = {}
+def ExtractRaw(body: list<string>): dict<any>
+    var raw_snippets: dict<string> = {}
+    var extends: list<string> = []
     var current_trigger = ''
     var current_body = []
 
     for line in body
         if line =~ '^#' | continue | endif
+
+        var extend_match = matchlist(line, '^extends\s\+\(.*\)')
+        if !empty(extend_match)
+            var exts = extend_match[1]->split('\v\s*,\s*|\s+')
+            extends->extend(exts)
+            continue
+        endif
 
         var start_snippet = matchlist(line, '^snippet\s\+\(\S\+\)')
         if !empty(start_snippet)
@@ -45,7 +53,7 @@ def ExtractRaw(body: list<string>): dict<string>
         raw_snippets[current_trigger] = current_body->join("\n")
     endif
 
-    return raw_snippets
+    return {snippets: raw_snippets, extends: extends}
 enddef
 
 # Compiles a single snippet into an AST.
@@ -107,35 +115,40 @@ def CompileSnippet(body: string): list<dict<any>>
 enddef
 
 # Compiles a snippet file into {name: AST}.
-def CompileSnippets(filepath: string): dict<list<dict<any>>>
+def CompileSnippets(filepath: string): dict<any>
     var lines = readfile(filepath)
-    var blocks = ExtractRaw(lines)
+    var rawfile = ExtractRaw(lines)
 
-    var snippets = {}
-    for [name, body] in blocks
+    var snippets: dict<list<dict<any>>> = {}
+    for [name, body] in items(rawfile.snippets)
         snippets[name] = CompileSnippet(body)
     endfor
 
-    return snippets
+    return {snippets: snippets, extends: rawfile.extends}
 enddef
 
 # Parses a snippet file for a specific filetype.
 # Stores the compiled snippets into memory.
-def ParseSnippets(fulltype: string)
+export def ParseSnippets(fulltype: string)
     # Handle ft1.ft2
     var filetypes = fulltype->split('.')
+    if empty(filetypes)
+        filetypes = [fulltype]
+    endif
+
     for ft in filetypes
         if compiled_snippets->has_key(ft) | continue | endif
+        compiled_snippets[ft] = {}
 
         var filepaths = globpath(&runtimepath, 'snippets/' .. ft .. '.snippets', 0, 1)
         for filepath in filepaths
-            compiled_snippets[ft]->extend(CompileSnippets(filepath))
+            var result = CompileSnippets(filepath)
+
+            for ext in result.extends
+                ParseSnippets(ext)
+                compiled_snippets[ft]->extend(compiled_snippets[ext], 'keep')
+            endfor
+            compiled_snippets[ft]->extend(result.snippets, 'force')
         endfor
     endfor
 enddef
-
-# Autocommand for compiling snippets on demand.
-augroup Snip9Compile
-    autocmd!
-    autocmd FileType * ParseSnippets(expand('<amatch>'))
-augroup END
