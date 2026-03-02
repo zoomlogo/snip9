@@ -9,8 +9,11 @@ Install using your favourite plugin manager.  The plugin searches for snippets
 under a `snippets/` folder in Vim's runtimepath with names `<ft>.snippets` where
 `<ft>` is the filetype detected by Vim.  To set the mappings use:
 ```vim
-let g:snip9_smartexpand = '<C-j>'
-let g:snip9_jumpback = '<C-k>'
+imap <C-j> <Plug>snip9nextOrTrigger
+smap <C-j> <Plug>snip9nextOrTrigger
+xmap <C-j> <Plug>snip9visual
+imap <C-k> <Plug>snip9back
+smap <C-k> <Plug>snip9back
 ```
 
 An example snippets file is given in the `sample_snippets/` folder of this

@@ -59,5 +59,9 @@ augroup Snip9Compile
     autocmd FileType * parser.ParseSnippets(expand('<amatch>'))
 augroup END
 
+inoremap <silent> <Plug>snip9nextOrTrigger <ScriptCmd>SmartBind()<CR>
+snoremap <silent> <Plug>snip9nextOrTrigger <ScriptCmd>SmartBind()<CR>
+xnoremap <silent> <Plug>snip9visual <ScriptCmd>engine.CaptureVisual()<CR>
 
-SetupMappings()
+inoremap <silent> <Plug>snip9back <ScriptCmd>engine.JumpBackward()<CR>
+snoremap <silent> <Plug>snip9back <ScriptCmd>engine.JumpBackward()<CR>
