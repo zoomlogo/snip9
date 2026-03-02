@@ -63,6 +63,7 @@ def CompileSnippet(body: string): list<dict<any>>
 
     var root: list<dict<any>> = []
     var stack = [root]
+    var mirror: dict<any> = {}
 
     while pos < len(body)
         var match = matchstrpos(body, pattern, pos)
@@ -99,13 +100,22 @@ def CompileSnippet(body: string): list<dict<any>>
             var id = str2nr(token[2 : len(token) - 2])
             var node = {type: AST.Mark, id: id, value: []}
             stack[-1]->add(node)
+            mirror[id] = node.value
             stack->add(node.value)
         elseif token =~ '^\${\d\+}$'
             var id = str2nr(token[2 : len(token) - 2])
-            stack[-1]->add({type: AST.Mark, id: id})
+            if mirror->has_key(id)
+                stack[-1]->add({type: AST.Mark, id: id, value: mirror[id]})
+            else
+                stack[-1]->add({type: AST.Mark, id: id})
+            endif
         elseif token =~ '^\$\d\+$'
             var id = str2nr(token[1 : len(token) - 1])
-            stack[-1]->add({type: AST.Mark, id: id})
+            if mirror->has_key(id)
+                stack[-1]->add({type: AST.Mark, id: id, value: mirror[id]})
+            else
+                stack[-1]->add({type: AST.Mark, id: id})
+            endif
         endif
 
         pos = end
