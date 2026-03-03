@@ -217,7 +217,7 @@ def SyncMirrors()
         type: 'snippet_mark',
         lnum: line('.')
     })
-    if empty(active) | return | endif
+    if empty(active) || active.id % ID_JUMPS == 0 | return | endif
 
     var curline = getline(active.lnum)
     var text = curline[active.col - 1 : active.col + active.length - 2]
