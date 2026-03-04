@@ -215,9 +215,26 @@ enddef
 def SyncMirrors()
     var active = prop_find({
         type: 'snippet_mark',
-        lnum: line('.')
+        lnum: line('.'),
+        col: col('.')
     })
-    if empty(active) || active.id % ID_JUMPS == 0 | return | endif
+    if empty(active) | return | endif
+
+    # XXX This is a "hacky" way to kill snippets extending to the next line
+    # when the user presses enter.
+    var previous = prop_find({
+        type: 'snippet_mark',
+        id: active.id,
+        both: true,
+        lnum: line('.'),
+        col: col('.'),
+        skipstart: true
+    }, 'b')
+    if !empty(previous) && previous.lnum == active.lnum - 1
+        # property spilled over, remove current property
+        prop_remove({id: active.id, lnum: active.lnum})
+        return
+    endif
 
     var curline = getline(active.lnum)
     var text = curline[active.col - 1 : active.col + active.length - 2]
