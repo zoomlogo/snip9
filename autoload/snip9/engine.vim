@@ -107,7 +107,8 @@ export def SnippetExpand(ast: list<dict<any>>)
 
     augroup Snip9Mirrors
         autocmd! * <buffer>
-        autocmd TextChangedI,TextChangedP <buffer> SyncMirrors()
+        # TODO
+        # autocmd TextChangedI,TextChangedP <buffer> SyncMirrors()
     augroup END
 enddef
 
@@ -145,7 +146,11 @@ enddef
 def SelectProp(prop: dict<any>)
     var keys = "\<Esc>" .. prop.lnum .. "G" .. prop.col .. "|"
     if prop.length > 0
-        keys ..= "v" .. (prop.length - 1) .. "l\<C-g>"
+        keys ..= "v"
+        if prop.length > 1
+            keys ..= (prop.length - 1) .. "l"
+        endif
+        keys ..= "\<C-g>"
     else
         keys ..= "a"
     endif
@@ -213,26 +218,18 @@ enddef
 # Mirror handling.
 # Update all marks with the same ID to match their texts.
 def SyncMirrors()
+    # Something is horribly wrong in this function.
+    # TODO:zoomlogo:2026-03-05: rewrite this function
+    # TODO:zoomlogo:2026-03-05: Jumping is also broken horribly.
     var active = prop_find({
         type: 'snippet_mark',
         lnum: line('.'),
         col: col('.')
     })
-    if empty(active) | return | endif
-
-    # XXX This is a "hacky" way to kill snippets extending to the next line
-    # when the user presses enter.
-    var previous = prop_find({
-        type: 'snippet_mark',
-        id: active.id,
-        both: true,
-        lnum: line('.'),
-        col: col('.'),
-        skipstart: true
-    }, 'b')
-    if !empty(previous) && previous.lnum == active.lnum - 1
-        # property spilled over, remove current property
-        prop_remove({id: active.id, lnum: active.lnum})
+    # exit if property is not found or is multiline.
+    # TODO actually fix this.  the correct way to fix this would be to correctly
+    # _update and sync_ multiline properties as well.
+    if empty(active) || active.start == 0 || active.end == 0
         return
     endif
 
