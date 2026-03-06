@@ -233,6 +233,9 @@ def SyncMirrors()
 
     var curline = getline(active.lnum)
     var text = curline[active.col - 1 : active.col + active.length - 2]
+    if active.col + active.length - 2 < 0
+        text = ""
+    endif
 
     var lnums = prop_list(1, {
         end_lnum: line('$'),
