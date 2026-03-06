@@ -2,7 +2,8 @@
 Snip9 is a snippet engine made in Vim9 script.  It is _mostly_ compatible with
 snipMate's snippet syntax.
 
-**THIS PLUGIN IS NOT STABLE YET.  IT IS UNDER ACTIVE DEVELOPMENT.**
+**THIS PLUGIN IS NOT STABLE/TESTED PROPERLY YET.  IT IS UNDER ACTIVE DEVELOPMENT.**
+Install at your own risk and please report any bugs.
 
 ## Setup.
 Requires Vim 9+.
@@ -38,4 +39,4 @@ repository.
 - Empty markers enter insert mode in the wrong column.
 - Snipmate snippets which use snipmate specific functions cannot be used.
 
-Please open an issue if you find any bugs.
+Please open an [issue](https://github.com/zoomlogo/snip9/issues) if you find any bugs.
