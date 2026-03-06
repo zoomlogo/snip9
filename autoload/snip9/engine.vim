@@ -41,6 +41,12 @@ def SnippetExpandR(ast: list<dict<any>>, indent: string, parent_id: number, loff
             var child_lines = SnippetExpandR(child_ast, indent, parent_id, m_lnum, m_col - 1)
             val = child_lines->join("\n")
 
+            # Account for user's whitespace setting.
+            # FIXME Unfortuantely this has to be duplicated.
+            if &expandtab
+                val = val->substitute('\t', ' '->repeat(shiftwidth()), 'g')
+            endif
+
             markers->add({
                 id: parent_id + token.id,
                 line_offset: m_lnum,
@@ -107,8 +113,7 @@ export def SnippetExpand(ast: list<dict<any>>)
 
     augroup Snip9Mirrors
         autocmd! * <buffer>
-        # TODO
-        # autocmd TextChangedI,TextChangedP <buffer> SyncMirrors()
+        autocmd TextChangedI,TextChangedP <buffer> SyncMirrors()
     augroup END
 enddef
 
@@ -143,6 +148,7 @@ def Cleanup(snip: dict<any>)
 enddef
 
 # Jumps to the property and selects it.
+# TODO:zoomlogo:2026-03-06: Fix when user expands tabs.
 def SelectProp(prop: dict<any>)
     var keys = "\<Esc>" .. prop.lnum .. "G" .. prop.col .. "|"
     if prop.length > 0
@@ -218,20 +224,12 @@ enddef
 # Mirror handling.
 # Update all marks with the same ID to match their texts.
 def SyncMirrors()
-    # Something is horribly wrong in this function.
-    # TODO:zoomlogo:2026-03-05: rewrite this function
-    # TODO:zoomlogo:2026-03-05: Jumping is also broken horribly.
     var active = prop_find({
         type: 'snippet_mark',
-        lnum: line('.'),
-        col: col('.')
+        lnum: line('.')
     })
-    # exit if property is not found or is multiline.
-    # TODO actually fix this.  the correct way to fix this would be to correctly
-    # _update and sync_ multiline properties as well.
-    if empty(active) || active.start == 0 || active.end == 0
-        return
-    endif
+    if empty(active) | return | endif
+    if !active.start || !active.end | return | endif
 
     var curline = getline(active.lnum)
     var text = curline[active.col - 1 : active.col + active.length - 2]
